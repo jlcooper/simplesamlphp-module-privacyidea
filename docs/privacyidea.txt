@@ -150,6 +150,11 @@ Use the following example:
 
   // To verify peer, enter true. Do not enter false in productive environments.
     'sslverifypeer'     => true,
+
+  // If you want to pass users without a token, you can enable 'loginWithoutToken'.
+  // The user has to be listed in privacyIDEA and the policy 'passOnNoToken' must be activated.
+  // Optional. By default this is set to false
+    'loginWithoutToken' => true
     
     ),
 ),

@@ -42,6 +42,13 @@ class sspmod_privacyidea_Auth_Process_privacyidea extends SimpleSAML_Auth_Proces
 	 */
 	private $uidKey;
 
+	/**
+	 * If a user has no token, the 2FA screen should be skipped.
+	 * To enable that, the value needs to be set to true.
+	 * The policy passOnNoToken in privacyIDEA should be set.
+	 */
+	private $loginWithoutToken;
+
     /**
      * Per se we do not need an attributemap, since all attributes are
      * usually set by the authsource
@@ -66,6 +73,7 @@ class sspmod_privacyidea_Auth_Process_privacyidea extends SimpleSAML_Auth_Proces
         $this->sslverifypeer = $cfg->getBoolean('sslverifypeer', true);
         $this->realm = $cfg->getString('realm');
         $this->uidKey = $cfg->getString('uidKey');
+        $this->loginWithoutToken = $cfg->getBoolean('loginWithoutToken', false);
      }
 
     /**
@@ -87,8 +95,15 @@ class sspmod_privacyidea_Auth_Process_privacyidea extends SimpleSAML_Auth_Proces
 	    );
 
         $id = SimpleSAML_Auth_State::saveState($state, 'privacyidea:privacyidea:init');
-        $url = SimpleSAML_Module::getModuleURL('privacyidea/otpform.php');
-        SimpleSAML_Utilities::redirectTrustedURL($url, array('StateId' => $id));
+        if ($this->loginWithoutToken) {
+        	if (!self::authenticate($state, "check, if user has a token")) {
+		        $url = SimpleSAML_Module::getModuleURL('privacyidea/otpform.php');
+		        SimpleSAML_Utilities::redirectTrustedURL($url, array('StateId' => $id));
+	        }
+        } else {
+	        $url = SimpleSAML_Module::getModuleURL('privacyidea/otpform.php');
+	        SimpleSAML_Utilities::redirectTrustedURL($url, array('StateId' => $id));
+        }
 
 
 
